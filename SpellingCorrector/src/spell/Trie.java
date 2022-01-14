@@ -5,22 +5,23 @@ public class Trie implements ITrie {
     private Trie count;
     private int wordCount;
     private int nodeCount;
+    private Node child;
+
 
     @Override
     public void add(String word) {
-        var trie = new Trie();
         word.toLowerCase(); // Make the word lower case
         for (int i = 0; i < word.length(); i++) {
-            /*TODO: if(trie is empty at letter) {
-                insert letter?
+            char currentChar = word.charAt(i);
+            if (child.getChildren()[currentChar - 'a'] == null) {    // If there is no Node @currentChar's index...
+                child.getChildren()[currentChar - 'a'] = new Node(); // Make a new node where the given index is
 
-             */
+
+            }
+
 
         }
-
-
     }
-
     @Override
     public INode find(String word) {
         return null;
@@ -28,12 +29,12 @@ public class Trie implements ITrie {
 
     @Override
     public int getWordCount() {
-        return 0;
+        return wordCount;
     }
 
     @Override
     public int getNodeCount() {
-        return 0;
+        return nodeCount;
     }
 
     public String toString() {
