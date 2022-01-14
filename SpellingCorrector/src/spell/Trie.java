@@ -5,18 +5,25 @@ public class Trie implements ITrie {
     private Trie count;
     private int wordCount;
     private int nodeCount;
-    private Node child;
+    private Node root;
 
+    public Trie() {
+        root = new Node();
+    }
 
     @Override
     public void add(String word) {
-        word.toLowerCase(); // Make the word lower case
+        Node tempRoot = root;
+        word = word.toLowerCase(); // Make the word lower case
         for (int i = 0; i < word.length(); i++) {
             char currentChar = word.charAt(i);
-            if (child.getChildren()[currentChar - 'a'] == null) {    // If there is no Node @currentChar's index...
-                child.getChildren()[currentChar - 'a'] = new Node(); // Make a new node where the given index is
-
-
+            int arrayIndex = currentChar - 'a';
+            if (tempRoot.getChildren()[arrayIndex] == null) {         // If there is no Node @currentChar's index...
+                tempRoot.getChildren()[arrayIndex] = new Node();      // Make a new node where the given index is
+                tempRoot = (Node) tempRoot.getChildren()[arrayIndex]; // Set the root to this new location
+                if (i == word.length() - 1) {                            // This means we've reached the end of a word
+                    tempRoot.getChildren()[arrayIndex].incrementValue(); // Therefore, increment the node's countValue
+                }
             }
 
 

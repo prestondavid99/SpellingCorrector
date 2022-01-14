@@ -16,7 +16,7 @@ public class SpellCorrector implements ISpellCorrector {
             var trie = new Trie();
             trie.add(str);
 
-            // If string has alreay been seen count++
+            // If string has already been seen count++
 
 
 
