@@ -7,7 +7,9 @@ public class Trie implements ITrie {
     private int nodeCount;
 
     public Trie() {
-        var nodes[] = new Node()[26];
+        Node nodes[] = new Node[26];
+
+
     }
 
     @Override
