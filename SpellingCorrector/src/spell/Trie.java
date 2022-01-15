@@ -9,6 +9,7 @@ public class Trie implements ITrie {
 
     public Trie() {
         root = new Node();
+        nodeCount = 1;
     }
 
     @Override
@@ -18,20 +19,43 @@ public class Trie implements ITrie {
         for (int i = 0; i < word.length(); i++) {
             char currentChar = word.charAt(i);
             int arrayIndex = currentChar - 'a';
+
             if (tempRoot.getChildren()[arrayIndex] == null) {         // If there is no Node @currentChar's index...
-                tempRoot.getChildren()[arrayIndex] = new Node();      // Make a new node where the given index is
-                tempRoot = (Node) tempRoot.getChildren()[arrayIndex]; // Set the root to this new location
-                if (i == word.length() - 1) {                            // This means we've reached the end of a word
-                    tempRoot.getChildren()[arrayIndex].incrementValue(); // Therefore, increment the node's countValue
-                }
+                tempRoot = (Node) (tempRoot.getChildren()[arrayIndex] = new Node()); // Make a new node where the given index is
+                ++nodeCount;
+            } else {
+                tempRoot = (Node) tempRoot.getChildren()[arrayIndex]; // Otherwise, we'll traverse the tree anyway
             }
 
+            if (i == word.length() - 1) {  // This means we've reached the end of a word
+                if(tempRoot.getValue() == 0) {
+                    wordCount++;
+                }
+                tempRoot.incrementValue(); // Therefore, increment the node's countValue
 
+            }
         }
     }
+
+
+
     @Override
     public INode find(String word) {
-        return null;
+        Node currRoot = root;
+        word = word.toLowerCase();
+
+        for (int i = 0; i < word.length(); i++) {
+            char currentChar = word.charAt(i);
+            int arrayIndex = currentChar - 'a';
+
+            if(currRoot.getChildren()[arrayIndex] != null) {
+                currRoot = (Node) currRoot.getChildren()[arrayIndex];
+            }
+            else {
+                return null;
+            }
+        }
+        return currRoot;
     }
 
     @Override
