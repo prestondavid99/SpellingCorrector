@@ -32,7 +32,6 @@ public class Trie implements ITrie {
                     wordCount++;
                 }
                 tempRoot.incrementValue(); // Therefore, increment the node's countValue
-
             }
         }
     }
@@ -48,8 +47,11 @@ public class Trie implements ITrie {
             char currentChar = word.charAt(i);
             int arrayIndex = currentChar - 'a';
 
-            if(currRoot.getChildren()[arrayIndex] != null) {
+            if (currRoot.getChildren()[arrayIndex] != null) {
                 currRoot = (Node) currRoot.getChildren()[arrayIndex];
+                if ((currRoot.getValue() == 0) && (i == word.length() - 1)) { // If the currRoot is not a word after reaching the end of the loop
+                    return null;
+                }
             }
             else {
                 return null;
@@ -69,17 +71,28 @@ public class Trie implements ITrie {
     }
 
     public String toString() {
-        return "";
+        var currWord = new StringBuilder();
+        var output = new StringBuilder();
+
+        toStringHelper(root, currWord, output);
+
+        return output.toString();
     }
 
-    public String toStringHelper(Node n) {
-        if (n.getValue() > 0) { // If the Node's count is greater than 0
-            // Append the node's word
+    public void toStringHelper(Node n, StringBuilder currWord, StringBuilder output) {
+        if (n.getValue() > 0) { // If the Node's count is greater than 0, there is a word
+            output.append(currWord.toString());
+            output.append("\n");
         }
 
-        for (int i = 0; i < 26; i++) {
-            Node child = (Node) n.getChildren()[i]; // at i ?
+        for (int i = 0; i < n.getChildren().length; i++) {
+            Node child = (Node) n.getChildren()[i];
+            if (child != null) {
+                char childChar = (char)('a' + i);
+                currWord.append(childChar);
+                toStringHelper(child, currWord, output);
+                currWord.deleteCharAt(currWord.length() - 1);
+            }
         }
-        return "";
     }
 }
