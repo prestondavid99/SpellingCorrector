@@ -95,4 +95,50 @@ public class Trie implements ITrie {
             }
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == null) {
+            return false;
+        }
+
+        if (o == this) {
+            return true;
+        }
+
+        if (o.getClass() != this.getClass()) {
+            return false;
+        }
+
+        Trie t = (Trie)o; // This makes typeCasts "o" to a Trie called t
+
+        if ((t.getWordCount() == this.getWordCount()) && (t.getNodeCount() == this.getNodeCount())) {
+            return equalsHelper(t.root, this.root);
+        }
+        return false;
+    }
+
+    public boolean equalsHelper(Node n1, Node n2) {
+
+        if (n1.getValue() != n2.getValue()) {
+            return false;
+        }
+
+        if (n1.getChildren() != n2.getChildren()) {
+            return false;
+        }
+
+        for (int i = 0; i < n1.getChildren().length; i++) {
+            equalsHelper((Node) n1.getChildren()[i], (Node) n2.getChildren()[i]);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashInt = 31;
+        return this.getWordCount() * this.getNodeCount() * hashInt;
+    }
 }
+
