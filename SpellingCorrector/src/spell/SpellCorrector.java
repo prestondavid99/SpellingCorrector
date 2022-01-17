@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class SpellCorrector implements ISpellCorrector {
+    Trie trie = new Trie();
+
     @Override
     public void useDictionary(String dictionaryFileName) throws IOException {
         var file = new File(dictionaryFileName);
@@ -13,10 +15,9 @@ public class SpellCorrector implements ISpellCorrector {
 
         while(scanner.hasNext()) {
             String str = scanner.next();
-            var trie = new Trie();
             trie.add(str);
 
-            // If string has already been seen count++
+
 
 
 
@@ -25,6 +26,9 @@ public class SpellCorrector implements ISpellCorrector {
 
     @Override
     public String suggestSimilarWord(String inputWord) {
+        if (trie.find(inputWord) == null) { // If null, then the word has not been found
+
+        }
         return null;
     }
 }
