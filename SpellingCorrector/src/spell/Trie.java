@@ -2,6 +2,8 @@ package spell;
 
 public class Trie implements ITrie {
 
+
+
     private Trie count;
     private int wordCount;
     private int nodeCount;
@@ -119,26 +121,41 @@ public class Trie implements ITrie {
         return false;
     }
 
-    public boolean equalsHelper(Node n1, Node n2) {
+    public boolean equalsHelper(INode n1, INode n2) {
 
-        if (n1.getValue() != n2.getValue()) {
+        if (n1.getValue() != n2.getValue()) { // Compare their count values
             return false;
         }
 
-        if (n1.getChildren() != n2.getChildren()) {
-            return false;
+        for (int i = 0; i < n1.getChildren().length; i++) { // Do children all have the same null/non-null children in the same spots?
+            if ((n1.getChildren()[i] == null) && (n2.getChildren()[i] == null)) { // If both are null
+                continue;
+            } else if ((n1.getChildren()[i] == null) || (n2.getChildren()[i] == null)) { // Otherwise if one of them is null and the other is not
+                return false;
+            } else {
+                boolean returnState = equalsHelper(n1.getChildren()[i], n2.getChildren()[i]);
+                if(returnState == false) {
+                    return false;
+                }
+            }
         }
-
-        for (int i = 0; i < n1.getChildren().length; i++) {
-            equalsHelper((Node) n1.getChildren()[i], (Node) n2.getChildren()[i]);
-        }
-        return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
         int hashInt = 31;
-        return this.getWordCount() * this.getNodeCount() * hashInt;
+        int temp = 0;
+        for (int i = 0; i < root.getChildren().length; i++) {
+            if (root.getChildren()[i] != null) {
+                temp = temp + i;
+            }
+        }
+        return (this.getWordCount() * this.getNodeCount() * hashInt) + temp;
+    }
+
+    public int getCount(String word) {
+        return find(word).getValue();
     }
 }
 
