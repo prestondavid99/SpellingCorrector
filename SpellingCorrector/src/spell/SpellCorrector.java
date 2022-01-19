@@ -20,17 +20,31 @@ public class SpellCorrector implements ISpellCorrector {
 
     @Override
     public String suggestSimilarWord(String inputWord) {
+        inputWord = inputWord.toLowerCase();
         if (trie.find(inputWord) == null) { // If null, then the word has not been found
-            Set<String> possibleWords = new HashSet<>();
-            Iterator<String> itr = possibleWords.iterator();
+            Set<String> distanceOneWords = new HashSet<>();
+            Set<String> distanceTwoWords = new HashSet<>();
 
-            possibleWords.addAll(deletionDistance(inputWord));
-            possibleWords.addAll(transpositionDistance(inputWord));
-            possibleWords.addAll(alterationDistance(inputWord));
-            possibleWords.addAll(insertionDistance(inputWord));
+            distanceOneWords.addAll(deletionDistance(inputWord));
+            distanceOneWords.addAll(transpositionDistance(inputWord));
+            distanceOneWords.addAll(alterationDistance(inputWord));
+            distanceOneWords.addAll(insertionDistance(inputWord));
 
-            if (possibleWords.size() == 1) { // If there's only one item...
-                for (String s : possibleWords) {
+            for (String s : distanceOneWords) {
+                distanceTwoWords.addAll(deletionDistance(s));
+                distanceTwoWords.addAll(transpositionDistance(s));
+                distanceTwoWords.addAll(alterationDistance(s));
+                distanceTwoWords.addAll(insertionDistance(s));
+            }
+
+            distanceOneWords = findValidWords(distanceOneWords);
+            distanceTwoWords = findValidWords(distanceTwoWords);
+
+            if (distanceOneWords.size() == 1 || distanceTwoWords.size() == 1) { // If there's only one item...
+                for (String s : distanceOneWords) {
+                    return s;
+                }
+                for (String s : distanceTwoWords) {
                     return s;
                 }
             }
@@ -38,19 +52,36 @@ public class SpellCorrector implements ISpellCorrector {
                 int count = 0;
                 String currString;
                 TreeMap<Integer, String> possibilities = new TreeMap<Integer, String>();
-                while (itr.hasNext()) {
-                    int wordCount = trie.getCount(itr.next());
+                for (String s : distanceOneWords) {
+                    int wordCount = trie.getCount(s);
                     if (wordCount > count) {
                         count = wordCount;
-                        currString = itr.next(); // TODO: MAYBE A PROBLEM
+                        currString = s;
                         possibilities.put(wordCount, currString);
                     }
                 }
 
-                for (Map.Entry<Integer, String> entry :
-                     possibilities.entrySet()) {
-                    if (possibilities.containsKey(count)) {
-                        return possibilities.get(count);
+                for (Map.Entry<Integer, String> entry : possibilities.entrySet()) {
+                    if (entry.getKey() == count) {
+                        return entry.getValue();
+                    }
+                }
+
+                int count2 = 0;
+                String currString2;
+                TreeMap<Integer, String> possibilities2 = new TreeMap<Integer, String>();
+                for (String s : distanceTwoWords) {
+                    int wordCount = trie.getCount(s);
+                    if (wordCount > count2) {
+                        count2 = wordCount;
+                        currString2 = s;
+                        possibilities2.put(wordCount, currString2);
+                    }
+                }
+
+                for (Map.Entry<Integer, String> entry : possibilities2.entrySet()) {
+                    if (entry.getKey() == count2) {
+                        return entry.getValue();
                     }
                 }
             }
@@ -62,31 +93,38 @@ public class SpellCorrector implements ISpellCorrector {
         return null;
     }
 
-    public Set<String> deletionDistance(String inputWord) {
-        Set<StringBuilder> deletionSet = new HashSet<>();
+    public Set<String> findValidWords(Set<String> inputWords) {
         Set<String> possibleWords = new HashSet<>();
-
-        for (int i = 0; i < inputWord.length(); i++) {
-            var currWord = new StringBuilder(inputWord);
-            deletionSet.add(currWord.deleteCharAt(i));
-        }
-
-        for (StringBuilder sb :
-             deletionSet) {
-            if(trie.find(sb.toString()) != null) {
-                possibleWords.add(sb.toString());
+        for (String s : inputWords) {
+            if(trie.find(s) != null) {
+                possibleWords.add(s);
             }
         }
         return possibleWords;
     }
 
-    public Set<String> transpositionDistance(String inputWord) {
-        Set<StringBuilder> transpositionSet = new HashSet<>();
-        Set<String> possibleWords = new HashSet<>();
-
+    public Set<String> deletionDistance(String inputWord) {
+        Set<String> deletionSet = new HashSet<>();
 
         for (int i = 0; i < inputWord.length(); i++) {
             var currWord = new StringBuilder(inputWord);
+            deletionSet.add(currWord.deleteCharAt(i).toString());
+        }
+
+
+        return deletionSet;
+    }
+
+    public Set<String> transpositionDistance(String inputWord) {
+        Set<String> transpositionSet = new HashSet<>();
+
+        for (int i = 0; i < inputWord.length(); i++) {
+            var currWord = new StringBuilder(inputWord);
+
+            if (inputWord.length() == 1) {
+                transpositionSet.add(currWord.toString());
+                return transpositionSet;
+            }
 
             if (i != inputWord.length() - 1) {
                 currWord = swap(inputWord, i, i + 1);
@@ -94,15 +132,9 @@ public class SpellCorrector implements ISpellCorrector {
             else {
                 currWord = swap(inputWord, i, i - 1);
             }
-            transpositionSet.add(currWord);
+            transpositionSet.add(currWord.toString());
         }
-
-        for (StringBuilder sb : transpositionSet) {
-            if(trie.find(sb.toString()) != null) {
-                possibleWords.add(sb.toString());
-            }
-        }
-        return possibleWords;
+        return transpositionSet;
     }
 
     public StringBuilder swap(String inputWord, int i, int j) {
@@ -113,35 +145,22 @@ public class SpellCorrector implements ISpellCorrector {
         return sb;
     }
 
-
     public Set<String> alterationDistance(String inputWord) {
-        Set<StringBuilder> alterationSet = new HashSet<>();
-        Set<String> possibleWords = new HashSet<>();
-
-
+        Set<String> alterationSet = new HashSet<>();
 
         for (int i = 0; i < inputWord.length(); i++) {
             for (int j = 0; j < 26; j++) {
                 char currLetter = (char) ('a' + j);
                 var currWord = new StringBuilder(inputWord);
                 currWord.setCharAt(i, currLetter);
-                alterationSet.add(currWord);
+                alterationSet.add(currWord.toString());
                 }
             }
-
-        for (StringBuilder sb : alterationSet) {
-            if (trie.find(sb.toString()) != null) {
-                possibleWords.add(sb.toString());
-            }
-        }
-        return possibleWords;
+        return alterationSet;
     }
 
     public Set<String> insertionDistance(String inputWord) {
-        Set<StringBuilder> insertionSet = new HashSet<>(); // Initialize Set
-        Set<String> possibleWords = new HashSet<>();
-
-
+        Set<String> insertionSet = new HashSet<>(); // Initialize Set
 
         for (int i = 0; i < inputWord.length() + 1; i++) { // Char axis
             for (int j = 0; j < 26; j++) { // Alphabet Axis
@@ -149,17 +168,9 @@ public class SpellCorrector implements ISpellCorrector {
                 var currWord = new StringBuilder(inputWord);
 
                 currWord.insert(i, currLetter);
-                insertionSet.add(currWord);
+                insertionSet.add(currWord.toString());
             }
         }
-
-        for (StringBuilder sb : insertionSet) {
-            if(trie.find(sb.toString()) != null) {
-                possibleWords.add(sb.toString());
-            }
-        }
-        return possibleWords;
+        return insertionSet;
     }
-
-
 }
