@@ -20,6 +20,11 @@ public class SpellCorrector implements ISpellCorrector {
 
     @Override
     public String suggestSimilarWord(String inputWord) {
+
+        if (inputWord.equals("")) {
+            return null;
+        }
+
         inputWord = inputWord.toLowerCase();
         if (trie.find(inputWord) == null) { // If null, then the word has not been found
             Set<String> distanceOneWords = new HashSet<>();
@@ -49,30 +54,30 @@ public class SpellCorrector implements ISpellCorrector {
                 }
             }
             else {
-                int count = 0;
+                int maxVal = 0;
                 String currString;
-                TreeMap<Integer, String> possibilities = new TreeMap<Integer, String>();
+                TreeMap<Integer, String> possibilities = new TreeMap<>();
                 for (String s : distanceOneWords) {
                     int wordCount = trie.getCount(s);
-                    if (wordCount > count) {
-                        count = wordCount;
+                    if (wordCount >= maxVal) {
+                        maxVal = wordCount;
                         currString = s;
                         possibilities.put(wordCount, currString);
                     }
                 }
 
                 for (Map.Entry<Integer, String> entry : possibilities.entrySet()) {
-                    if (entry.getKey() == count) {
+                    if (entry.getKey() == maxVal) {
                         return entry.getValue();
                     }
                 }
 
                 int count2 = 0;
                 String currString2;
-                TreeMap<Integer, String> possibilities2 = new TreeMap<Integer, String>();
+                TreeMap<Integer, String> possibilities2 = new TreeMap<>();
                 for (String s : distanceTwoWords) {
                     int wordCount = trie.getCount(s);
-                    if (wordCount > count2) {
+                    if (wordCount >= count2) {
                         count2 = wordCount;
                         currString2 = s;
                         possibilities2.put(wordCount, currString2);
@@ -83,6 +88,7 @@ public class SpellCorrector implements ISpellCorrector {
                     if (entry.getKey() == count2) {
                         return entry.getValue();
                     }
+
                 }
             }
 
@@ -106,12 +112,15 @@ public class SpellCorrector implements ISpellCorrector {
     public Set<String> deletionDistance(String inputWord) {
         Set<String> deletionSet = new HashSet<>();
 
+
+
         for (int i = 0; i < inputWord.length(); i++) {
             var currWord = new StringBuilder(inputWord);
+            if (inputWord.length() == 1) {
+                continue;
+            }
             deletionSet.add(currWord.deleteCharAt(i).toString());
         }
-
-
         return deletionSet;
     }
 
